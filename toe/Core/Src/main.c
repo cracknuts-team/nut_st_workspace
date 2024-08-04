@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define UART2_TRIGGER	0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -209,11 +209,14 @@ int main(void)
 				memset(rx1_buffer, 0x00, 6);
 				HAL_UART_Transmit(&huart1, rx1_buffer, 6, 0xffff);
 			} else if (rx1_buffer[0] == 0x01 && rx1_buffer[1] == 0x02) { // AES Encryption
-
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 				mbedtls_aes_crypt_ecb(&aes_ctx, MBEDTLS_AES_ENCRYPT,
 						rx1_buffer + 8, rx1_buffer + 6);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 				memset(rx1_buffer, 0x00, 6);
 				rx1_buffer[5] = 0x10;
 				HAL_UART_Transmit(&huart1, rx1_buffer, 6 + 16, 0xffff);
@@ -228,10 +231,14 @@ int main(void)
 //				HAL_UART_Transmit(&huart1, rx1_buffer, 6 + 16, 0xffff);
 			} else if (rx1_buffer[0] == 0x01 && rx1_buffer[1] == 0x03) {  // AES Decryption
 //				memcpy(Plaintext, rx1_buffer + 8, 16);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 				mbedtls_aes_crypt_ecb(&aes_ctx, MBEDTLS_AES_DECRYPT, rx1_buffer + 8,
 						rx1_buffer + 6);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 //				memcpy(rx1_buffer + 6, Computed_Ciphertext, 16);
 				memset(rx1_buffer, 0x00, 6);
 				rx1_buffer[5] = 0x10;
@@ -248,18 +255,26 @@ int main(void)
 				HAL_UART_Transmit(&huart1, rx1_buffer, 6, 0xffff);
 			} else if (rx1_buffer[0] == 0x02 && rx1_buffer[1] == 0x02) {  // DES Encryption
 //				memcpy(input, rx1_buffer + 8, 8);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 				mbedtls_des_crypt_ecb(&ctx, rx1_buffer + 8, rx1_buffer + 6);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 //				memcpy(rx1_buffer + 6, out?put, 8);
 				memset(rx1_buffer, 0x00, 6);
 				rx1_buffer[5] = 0x8;
 				HAL_UART_Transmit(&huart1, rx1_buffer, 6 + 8, 0xffff);
 			} else if (rx1_buffer[0] == 0x02 && rx1_buffer[1] == 0x03) {
 //				memcpy(input, rx1_buffer + 8, 8);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 				mbedtls_des_crypt_ecb(&ctx, rx1_buffer + 8, rx1_buffer + 6);
+#if UART2_TRIGGER
 				HAL_UART_Transmit(&huart2, rx2_buffer, 1, 0xffff);
+#endif
 //				memcpy(rx1_buffer + 6, output, 8);
 				memset(rx1_buffer, 0x00, 6);
 				rx1_buffer[5] = 0x8;
