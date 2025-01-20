@@ -1,13 +1,21 @@
-# Nut STM32F103C8Tx
+# Intruduction
 
-## 工程建立
+This repository is for `Nuts` using `STM32` chips, including:
 
-开发工具 STM32CubeIDE 1.16.0 https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software
+- stm32f103c8
+- stm32f407vg
+- stm32l476rgt6
 
-1. 克隆当前工程`git clone`
-4. 打开STM32CubeIDE软件
-   1. 导航到工程根目录，`File -> Switch WorkSpace -> other -> ../nut_st_workspace` ，
-   2. 导入工程，`File -> Import -> Existing Porjects into Workspace`，`root directory`选择`nut_st_workspace`
+
+
+# Build projects
+
+Develop tool [STM32CubeIDE 1.16.0](https://www.st.com/en/development-tools/stm32cubeide.html#st-get-software) 
+
+1. Clone current repo `git clone`
+4. Open STM32CubeIDE
+   1. Navigate to repo folder，`File -> Switch WorkSpace -> other -> ../nut_st_workspace` ，
+   2. Import projects，`File -> Import -> Existing Porjects into Workspace`，`root directory` choose `nut_st_workspace`
 
 ![Pasted image 20241207125232](./.README.assets/Pasted%20image%2020241207125232.png)
 
@@ -17,9 +25,9 @@
 
 
 
-## Nuts命令
+# Nuts Commands
 
-### Protocol
+## Protocol
 
 **Request**
 
@@ -45,11 +53,11 @@
 
 
 
-### Command
+## Command
 
 
 
-#### Set AES encryption key
+### Set AES encryption key
 
 **Request**
 
@@ -74,7 +82,7 @@ return << 00 00 00 00 00 00
 
 
 
-#### Set AES decryption key
+### Set AES decryption key
 
 **Request**
 
@@ -99,7 +107,7 @@ return << 00 00 00 00 00 00
 
 
 
-#### AES encryption
+### AES encryption
 
 **Request**
 
@@ -120,7 +128,7 @@ send   >> 01 02 00 00 00 00 00 10 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE F
 return << 00 00 00 00 00 10 62 F6 79 BE 2B F0 D9 31 64 1E 03 9C A3 40 1B B2
 ```
 
-#### AES decryption
+### AES decryption
 
 **Request**
 
@@ -141,7 +149,7 @@ send   >> 01 03 00 00 00 00 00 10 62 F6 79 BE 2B F0 D9 31 64 1E 03 9C A3 40 1B B
 return << 00 00 00 00 00 10 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF
 ```
 
-#### Set DES encryption key
+### Set DES encryption key
 
 **Request**
 
@@ -164,7 +172,7 @@ return << 00 00 00 00 00 00
 
 
 
-#### Set DES decryption key
+### Set DES decryption key
 
 **Request**
 
@@ -185,7 +193,7 @@ send   >> 02 00 00 00 00 00 00 08 88 99 AA BB CC DD EE FF
 return << 00 00 00 00 00 00 
 ```
 
-#### DES encryption
+### DES encryption
 
 **Request**
 
@@ -208,7 +216,7 @@ return << 00 00 00 00 00 08 97 9F FF 9B 97 0C A6 A4
 
 
 
-#### DES decryption
+### DES decryption
 
 **Request**
 
