@@ -98,6 +98,7 @@ uint8_t flag_cmd_payload; // 0: cmd; 1: payload;
 
 uint32_t payload_len;
 
+uint8_t can_rx_buffer[8];
 uint8_t rx_buffer[BUF_SIZE];
 uint8_t tx_buffer[BUF_SIZE];
 
@@ -105,7 +106,13 @@ uint16_t status;
 
 mbedtls_aes_context aes_ctx;
 mbedtls_des_context des_ctx;
-int key_length = 128; // 密钥长度，AES支持128�?????????????????????192�?????????????????????256位密�?????????????????????
+int key_length = 128; // 密钥长度，AES支持128�???????????????????????192�???????????????????????256位密�???????????????????????
+
+//uint8_t CANSendBuff[8]={0,1,2,3,4,5,6,7};
+uint32_t CAN_ID=0x381;
+uint32_t CAN_TARGET_ID=0x301;
+static CAN_RxHeaderTypeDef RxMessage;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -185,8 +192,81 @@ void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
 
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-    // 处理发�?�完�?
+    // 处理发�?�完�???
 }
+
+void CAN_SendMsg(uint16_t msgID, uint8_t *Data,uint8_t data_loc,uint8_t data_len)
+{
+    CAN_TxHeaderTypeDef   TxHeader;
+	TxHeader.StdId = msgID;			//stdID
+	TxHeader.RTR = CAN_RTR_DATA;		//Êý¾ÝÖ¡,CAN_RTR_DATA
+	TxHeader.IDE = CAN_ID_STD;		//±ê×¼¸ñÊ½
+	TxHeader.DLC =8;   				//Êý¾Ý³¤¶È
+	TxHeader.TransmitGlobalTime = DISABLE;
+	uint8_t  TxData[8];		//×î¶à8¸ö×Ö½Ú
+	//if(data_loc==0) TxData[0] = 0;
+	//else TxData[0] = 0xff;
+	TxData[0] = data_loc;
+	TxData[1] = *(Data+data_loc*7+0);
+	TxData[2] = *(Data+data_loc*7+1);
+	TxData[3] = *(Data+data_loc*7+2);
+	TxData[4] = *(Data+data_loc*7+3);
+	TxData[5] = *(Data+data_loc*7+4);
+	TxData[6] = *(Data+data_loc*7+5);
+	TxData[7] = *(Data+data_loc*7+6);
+	while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan) < 1) {
+	} //µÈ´ýÓÐ¿ÉÓÃµÄ·¢ËÍÓÊÏä
+	uint32_t TxMailbox;		//ÁÙÊ±±äÁ¿, ÓÃÓÚ·µ»ØÊ¹ÓÃµÄÓÊÏä±àºÅ
+	/*  ·¢ËÍµ½ÓÊÏä£¬ÓÉCANÄ£¿é¸ºÔð·¢ËÍµ½CAN×ÜÏß   */
+	if(HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
+    {
+         printf("can_err\r\n");
+    }
+}
+
+void CAN_Sendframe(uint16_t CAN_TARGET_ID, uint8_t *Data,uint8_t can_frame_num)
+{
+	uint8_t i;
+	for( i =0 ;i<can_frame_num;i++)
+	{
+	  CAN_SendMsg(CAN_TARGET_ID,Data,i,8);
+      //HAL_Delay(200);
+	}
+}
+
+
+uint8_t bsp_can1_filter_config(void)
+{
+    CAN_FilterTypeDef filter = {0};
+    filter.FilterActivation = ENABLE;
+    filter.FilterMode = CAN_FILTERMODE_IDMASK;
+    filter.FilterScale = CAN_FILTERSCALE_32BIT;
+    filter.FilterBank = 0;
+    filter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+    filter.FilterIdLow = 0;
+    filter.FilterIdHigh = 0;
+    filter.FilterMaskIdLow = 0;
+    filter.FilterMaskIdHigh = 0;
+    HAL_CAN_ConfigFilter(&hcan, &filter);
+
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+
+		uint8_t data[8];
+		HAL_StatusTypeDef status;
+
+		status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxMessage, data);
+		if (HAL_OK == status){
+			if(CAN_ID=RxMessage.StdId)
+			{memcpy(can_rx_buffer,data,8);
+
+			flag_can=1;}
+		}
+
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -232,6 +312,13 @@ int main(void)
 	HAL_UART_Receive_IT(&huart1, rx_buffer, CMD_LEN);
 	HAL_SPI_Receive_IT(&hspi1, rx_buffer, CMD_LEN);
 
+
+    bsp_can1_filter_config();//ÂË²¨Æ÷ÉèÖÃ£¬½ÓÊÕËùÓÐÖ¡
+    HAL_CAN_Start(&hcan);//Æô¶¯CAN
+	HAL_CAN_ActivateNotification(&hcan,CAN_IT_RX_FIFO0_MSG_PENDING);//ÖÐ¶Ï½ÓÊÕÊ¹ÄÜ
+	for(uint8_t i =0 ;i<16;i++)
+		tx_buffer[i] = i;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -240,11 +327,19 @@ int main(void)
 	mbedtls_aes_init(&aes_ctx);
 	mbedtls_des_init(&des_ctx);
 
+
+
+
 	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if (flag_uart || flag_spi || flag_i2c || flag_can) {
+
+
+
+
+		if (flag_uart || flag_spi || flag_i2c || flag_can)
+		{
 			SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 
 			LED_ON;
@@ -260,24 +355,55 @@ int main(void)
 			tx_buffer[1] = status & 0xff;
 			tx_buffer[2] = 0;
 			tx_buffer[3] = 0;
+			payload_len=32-5;
 			tx_buffer[4] = (payload_len & 0xff00) >> 8;
+
 			tx_buffer[5] = payload_len & 0xff;
 
+			for(uint8_t i =6 ;i<payload_len+6;i++)//make fake txbuffer data for test
+			{
+				tx_buffer[i] = i;
+			}
 
 			if (flag_uart) {
 				HAL_UART_Transmit(&huart1, tx_buffer, 6 + payload_len, 0xffff);
 				flag_uart = 0;
 				HAL_UART_Receive_IT(&huart1, rx_buffer, CMD_LEN);
 			} else if (flag_spi) {
-//				HAL_SPI_Transmit(&hspi1, tx_buffer, 6 + payload_len, HAL_MAX_DELAY);
 				HAL_SPI_Transmit_IT(&hspi1, tx_buffer, 6 + payload_len);
 				flag_spi = 0;
+			}else if (flag_can)
+			{
+				uint32_t rx_data_cnt;
+				uint32_t rx_payload;
+				uint8_t rx_DLC;
+				rx_DLC =RxMessage.DLC;
 
-//				HAL_SPI_DeInit(&hspi1);
-//				HAL_SPI_Init(&hspi1);
-//
-//				HAL_SPI_Receive_IT(&hspi1, rx_buffer, CMD_LEN);
+				if(can_rx_buffer[0]==0)//frame_start
+				{
+					rx_payload = can_rx_buffer[5]<<8+can_rx_buffer[6];
+					rx_data_cnt =0;
+				}
+
+
+				for(uint8_t i =0 ;i<7;i++)//make fake txbuffer data for test
+				{
+					rx_buffer[rx_data_cnt] = can_rx_buffer[i+1];
+					rx_data_cnt = rx_data_cnt+1;
+				}
+
+				if(rx_data_cnt>= rx_payload +6-1) {  //frame end
+				  //generate can_frame_num by counting every 8bytes;for a CAN_tx frame is 8bytes
+				  uint8_t can_frame_num = (6 + payload_len)/7;
+				  //pluse 1 frame_num,if there areis extra bytes exceed 8bytes
+				  if((6 + payload_len)%7 !=0) can_frame_num =can_frame_num+1;
+     				CAN_Sendframe(CAN_TARGET_ID, tx_buffer, can_frame_num);
+			      }
+
+				flag_can = 0;
 			}
+
+
 			flag_cmd_payload = 0;
 
 
@@ -300,13 +426,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL2;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -317,11 +442,11 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
