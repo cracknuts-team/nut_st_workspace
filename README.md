@@ -66,7 +66,9 @@
 
 STM32CubeIDE软件自动升级会导致工程不兼容问题，建议关闭自动升级功能。
 
-![turn_off_auto_update](https://tcs-devops.aliyuncs.com/storage/113gab3fa52ddf3d0416b6c61f1d63a8ff87?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjY2N2ZjNDhlOTY3OTRmNWM2ZDkyMDM0OSIsImV4cCI6MTc0MjY1NTU3MSwiaWF0IjoxNzQyMDUwNzcxLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExM2dhYjNmYTUyZGRmM2QwNDE2YjZjNjFmMWQ2M2E4ZmY4NyJ9.bqh7HU0VQuswnOl-S_V1XLL6MserOECHyGMXeZ7uPuo)
+![turn_off_auto_update](./.README.assets/turn_off_auto_update.png)
+
+
 
 
 
