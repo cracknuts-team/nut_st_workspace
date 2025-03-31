@@ -29,4 +29,21 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>include</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/process/mbedtls/include</locationURI>
+		</link>
+		<link>
+			<name>library</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/process/mbedtls/library</locationURI>
+		</link>
+		<link>
+			<name>process</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/process</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
