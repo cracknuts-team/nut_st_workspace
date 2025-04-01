@@ -13,6 +13,31 @@
 # 工程建立
 
 
+## 代码下载
+
+本仓库包含[子模块]<https://git-scm.com/docs/gitsubmodules>，所以克隆需要额外做一些参数：
+
+```shell
+git clone --recurse-submodules https://github.com/cracknuts-team/nut_st_workspace.git
+```
+
+如果已经克隆了仓库但是没有指定同步子模块，可以使用如下命令：
+
+```shell
+git submodule update --init --recursive
+```
+
+在执行仓库拉取操作时，也需要额外增加参数来更新子模块：
+
+```shell
+git pull --recurse-submodules
+```
+
+❗如果你需要更新子模块的代码到最新的提交可执行下面的代码进行更新（注意，此时更新的子模块代码仅仅是子模块的提交，不是主仓库指定的提交，仅推荐在自己开发时使用）
+
+```shell
+git submodule update --remote --recursive
+```
 
 ## 开发软件
 

@@ -1,3 +1,3 @@
 [submodule "process/mbedtls"]
 	path = process/mbedtls
-	url = git@github.com:cracknuts-team/mbedtls.git
+	url = https://github.com/cracknuts-team/mbedtls.git
