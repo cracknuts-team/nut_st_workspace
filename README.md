@@ -47,9 +47,43 @@
    git submodule update --remote --recursive
    ```
 
-2. 打开`STM32CubeIDE`软件
+2. FOR GITEE USER
 
-3. 指定`nut_st_workspace`为工作目录
+   如果您是通过[Gitee的仓库](https://gitee.com/cracknuts-team/nut_st_workspace)访问的当前文档，并且您无法连接到GitHub，你可以通过以下方式进行操作以同步代码：
+
+   1. 同步主仓库代码
+
+      ```shell
+      git clone https://gitee.com/cracknuts-team/nut_st_workspace.git
+      git submodule 
+      ```
+
+      上面 `git submodule`的输出要保留，下面需要用到，其输出类似如下内容：
+
+      ```
+      -88fc810bfa5852609bb2cf71011fa8b9a0860cae process/mbedtls
+      ```
+
+   2. 克隆子模块代码
+
+      ```shell
+      cd nut_st_workspace/process/mbedtls
+      git clone https://gitee.com/cracknuts-team/mbedtls.git .
+      ```
+
+      使用第一步获取到的子模块提交ID: `88fc810bfa5852609bb2cf71011fa8b9a0860cae`，检出该提交
+
+      ```shell
+      git checkout -b temp 88fc810bfa5852609bb2cf71011fa8b9a0860cae
+      ```
+
+   通过以上两步完成在Gitee仓库的代码同步。
+
+   **💡TIP**: *需要注意，您通过这种方式同步的代码，不能提交子模块的提交记录到主仓库*
+
+3. 打开`STM32CubeIDE`软件
+
+4. 指定`nut_st_workspace`为工作目录
 
    打开软件后选择路径到仓库目录
 
