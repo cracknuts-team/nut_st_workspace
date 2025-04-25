@@ -58,6 +58,9 @@ void process_cmd(void) {
 				tx_buffer + STA_LEN);
 		status = 0;
 		payload_len = 8;
+	} else if (rx_buffer[0] == 0xff) {
+		status = 0;
+		payload_len = 8;
 	} else {
 		status = 0x8000;
 		payload_len = 0;
